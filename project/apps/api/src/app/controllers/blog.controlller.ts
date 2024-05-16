@@ -18,8 +18,10 @@ import { PostQuery, RequestWithUserId } from '@project/shared/core';
 import {
   PostRdo,
   PostWithAuthorFullRdo,
+  PostWithAuthorIdRdo,
   PostWithPaginationRdo,
   UploadedFileRdo,
+  UserFullRdo,
   UserRdo,
 } from '@project/rdo';
 import { CreatePostDto, CreatePostWithAuthorDto } from '@project/dto';
@@ -90,12 +92,49 @@ export class BlogController {
   })
   @Get('/')
   public async index(@Query() query: PostQuery) {
-    const posts = await this.apiService.blog({
+    const posts = await this.apiService.blog<
+      unknown,
+      PostWithPaginationRdo<PostWithAuthorIdRdo>
+    >({
       method: 'get',
       endpoint: '',
       options: { params: query },
     });
 
-    return fillDto(PostWithPaginationRdo<PostWithAuthorFullRdo>, posts);
+    const users = await this.apiService.users<unknown, UserRdo[]>({
+      method: 'get',
+      endpoint: 'users',
+      options: {
+        params: { usersIds: posts.entities.map((el) => el.authorId) },
+      },
+    });
+
+    const concatedPosts: PostWithPaginationRdo<PostWithAuthorFullRdo> = {
+      ...posts,
+      entities: await Promise.all(
+        posts.entities.map(async (post) => {
+          const user = users.find((user) => user.id === post.authorId);
+
+          if (user?.avatar) {
+            const file = await this.apiService.fileVault<
+              string,
+              UploadedFileRdo
+            >({
+              method: 'get',
+              endpoint: user.avatar,
+            });
+
+            user.avatar = file.path;
+          }
+
+          return {
+            ...post,
+            author: user as UserFullRdo,
+          };
+        })
+      ),
+    };
+
+    return fillDto(PostWithPaginationRdo<PostWithAuthorFullRdo>, concatedPosts);
   }
 }
