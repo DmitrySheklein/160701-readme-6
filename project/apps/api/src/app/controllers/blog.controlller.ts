@@ -85,7 +85,7 @@ export class BlogController {
   })
   @ApiResponse({
     isArray: true,
-    type: PostRdo,
+    type: PostWithPaginationRdo<PostWithAuthorFullRdo>,
     status: HttpStatus.OK,
   })
   @Get('/')
