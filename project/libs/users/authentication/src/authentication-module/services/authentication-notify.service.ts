@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
 import { AuthService } from './authentication-service.interface';
-import { ChangePasswordDto, CreateUserDto, LoginUserDto, RecoveryEmailDto } from '@project/dto';
+import {
+  ChangePasswordDto,
+  CreateUserDto,
+  LoginUserDto,
+  RecoveryEmailDto,
+} from '@project/dto';
 
 import { BlogUserEntity } from '@project/blog-user';
 import { NotifyService } from '@project/users-notify';
@@ -32,6 +37,10 @@ export class AuthenticationNotifyService implements AuthService {
 
   public async getUserById(id: string) {
     return this.proxy.getUserById(id);
+  }
+
+  public async getUsersByIds(ids: string[]) {
+    return this.proxy.getUsersByIds(ids);
   }
 
   public async getUserByEmail(id: string) {

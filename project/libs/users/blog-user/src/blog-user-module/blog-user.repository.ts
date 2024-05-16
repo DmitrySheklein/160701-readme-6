@@ -25,4 +25,10 @@ export class BlogUserRepository extends BaseMongoRepository<
 
     return this.createEntityFromDocument(document);
   }
+
+  public async findManyByUserIds(userIds: string[]) {
+    const users = await this.model.find({ _id: { $in: userIds } }).exec();
+
+    return users.map((document) => this.createEntityFromDocument(document));
+  }
 }

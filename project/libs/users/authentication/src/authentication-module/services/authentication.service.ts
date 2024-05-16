@@ -106,6 +106,12 @@ export class AuthenticationService implements AuthService {
     return existUser;
   }
 
+  public async getUsersByIds(ids: string[]) {
+    const existUsers = await this.blogUserRepository.findManyByUserIds(ids)
+
+    return existUsers;
+  }
+
   public async getUserByEmail(email: string) {
     const existUser = await this.blogUserRepository.findByEmail(email);
 

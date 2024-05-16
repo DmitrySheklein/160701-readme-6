@@ -5,8 +5,10 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
+  ParseArrayPipe,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -47,6 +49,7 @@ import { LocalAuthGuard } from '../guards/local-auth.guard';
 import { RequestWithUser } from './request-with-user.interface';
 import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
 import { RequestWithTokenPayload } from './request-with-token-payload.interface';
+import { MongoIdValidationPipe } from '@project/pipes';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -185,5 +188,22 @@ export class AuthenticationController {
   @Post('check')
   public async checkToken(@Req() { user: payload }: RequestWithTokenPayload) {
     return payload;
+  }
+
+  @ApiOkResponse({
+    isArray: true,
+    type: UserRdo,
+    description: AuthenticationResponseMessage.UserFound,
+  })
+  @Get('users')
+  public async findUsers(
+    @Query('usersIds', ParseArrayPipe, MongoIdValidationPipe) usersIds: string[]
+  ) {
+    const existUsers = await this.authService.getUsersByIds(usersIds);
+
+    return fillDto(
+      UserRdo,
+      existUsers.map((el) => el.toPOJO())
+    );
   }
 }

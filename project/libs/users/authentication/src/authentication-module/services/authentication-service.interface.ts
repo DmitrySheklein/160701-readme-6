@@ -12,6 +12,7 @@ export interface AuthService {
   register(dto: CreateUserDto): Promise<BlogUserEntity>;
   verifyUser(dto: LoginUserDto): Promise<BlogUserEntity>;
   getUserById(id: string): Promise<BlogUserEntity>;
+  getUsersByIds(ids: string[]): Promise<BlogUserEntity[]>;
   getUserByEmail(email: string): Promise<BlogUserEntity>;
   createUserToken(user: BlogUserEntity): Promise<Token>;
   changePassword(id: string, dto: ChangePasswordDto): Promise<BlogUserEntity>;
