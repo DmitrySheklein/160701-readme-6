@@ -32,7 +32,6 @@ export class SwaggerService {
         },
         AuthKeyName
       )
-      .addBasicAuth({ type: 'http' })
       .build();
 
     const swaggerCustomOptions: SwaggerCustomOptions = {
