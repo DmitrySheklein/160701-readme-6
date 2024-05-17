@@ -75,4 +75,14 @@ export class AuthenticationNotifyService implements AuthService {
 
     return recoveryToken;
   }
+
+  public async deleteUserById({
+    userId,
+    deleteUserId,
+  }: {
+    userId: string;
+    deleteUserId: string;
+  }) {
+    return this.proxy.deleteUserById({ userId, deleteUserId });
+  }
 }

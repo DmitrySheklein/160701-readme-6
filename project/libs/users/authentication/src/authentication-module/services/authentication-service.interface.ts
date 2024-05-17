@@ -17,4 +17,11 @@ export interface AuthService {
   createUserToken(user: BlogUserEntity): Promise<Token>;
   changePassword(id: string, dto: ChangePasswordDto): Promise<BlogUserEntity>;
   recoveryEmail(dto: RecoveryEmailDto): Promise<string>;
+  deleteUserById({
+    userId,
+    deleteUserId,
+  }: {
+    userId: string;
+    deleteUserId: string;
+  }): Promise<void>;
 }

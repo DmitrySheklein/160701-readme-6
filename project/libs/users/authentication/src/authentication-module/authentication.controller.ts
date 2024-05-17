@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Inject,
+  Param,
   ParseArrayPipe,
   Patch,
   Post,
@@ -50,6 +52,9 @@ import { RequestWithUser } from './request-with-user.interface';
 import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
 import { RequestWithTokenPayload } from './request-with-token-payload.interface';
 import { MongoIdValidationPipe } from '@project/pipes';
+import { Roles } from '../decorators/role.decorator';
+import { UserRole } from '@project/shared/core';
+import { RolesGuard } from '../guards/role.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -205,5 +210,20 @@ export class AuthenticationController {
       UserRdo,
       existUsers.map((el) => el.toPOJO())
     );
+  }
+
+  @ApiBearerAuth(AuthKeyName)
+  @Roles(UserRole.Admin)
+  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
+  @Delete(':deleteUserId')
+  public async deleteUser(
+    @Param('deleteUserId', MongoIdValidationPipe) deleteUserId: string,
+    @Req() { user }: RequestWithTokenPayload
+  ) {
+    return this.authService.deleteUserById({
+      userId: String(user?.sub),
+      deleteUserId,
+    });
   }
 }

@@ -51,4 +51,13 @@ export class AuthenticationLoggerService implements AuthService {
   public async recoveryEmail(dto: RecoveryEmailDto) {
     return this.proxy.recoveryEmail(dto);
   }
+  public async deleteUserById({
+    userId,
+    deleteUserId,
+  }: {
+    userId: string;
+    deleteUserId: string;
+  }) {
+    return this.proxy.deleteUserById({ userId, deleteUserId });
+  }
 }

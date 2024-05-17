@@ -107,7 +107,7 @@ export class AuthenticationService implements AuthService {
   }
 
   public async getUsersByIds(ids: string[]) {
-    const existUsers = await this.blogUserRepository.findManyByUserIds(ids)
+    const existUsers = await this.blogUserRepository.findManyByUserIds(ids);
 
     return existUsers;
   }
@@ -195,5 +195,19 @@ export class AuthenticationService implements AuthService {
     }
 
     return randomUUID();
+  }
+
+  public async deleteUserById({
+    userId,
+    deleteUserId,
+  }: {
+    userId: string;
+    deleteUserId: string;
+  }) {
+    if (userId === deleteUserId) {
+      throw new ConflictException(`You can't delete yourself`);
+    }
+
+    return this.blogUserRepository.deleteById(deleteUserId);
   }
 }
