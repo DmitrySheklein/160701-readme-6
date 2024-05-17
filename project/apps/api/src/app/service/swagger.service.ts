@@ -1,7 +1,18 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
 import { DocumentBuilder, SwaggerCustomOptions } from '@nestjs/swagger';
+import { appConfig } from '@project/config';
 
+@Injectable()
 export class SwaggerService {
-  static createConfig() {
+  constructor(
+    @Inject(appConfig.KEY)
+    private readonly config: ConfigType<typeof appConfig>
+  ) {
+    this.config.port;
+  }
+
+  createConfig() {
     const config = new DocumentBuilder()
       .setTitle('The «API Gateway» service')
       .setDescription('«API Gateway» service API')
@@ -21,8 +32,12 @@ export class SwaggerService {
         },
         AuthKeyName
       )
+      .addBasicAuth({ type: 'http' })
       .build();
-    const swaggerCustomOptions: SwaggerCustomOptions = {};
+
+    const swaggerCustomOptions: SwaggerCustomOptions = {
+      customSiteTitle: '[API Gateway] Swagger UI',
+    };
 
     return { config, swaggerCustomOptions };
   }

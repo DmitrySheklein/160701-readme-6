@@ -8,6 +8,7 @@ import { ApiService } from './service/api.service';
 import { CheckAuthGuard } from './guards/check-auth.guard';
 import { AppService } from './app.service';
 import { LikesController } from './controllers/likes.controller';
+import { SwaggerService } from './service/swagger.service';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { LikesController } from './controllers/likes.controller';
     }),
   ],
   controllers: [BlogController, UsersController, LikesController],
-  providers: [CheckAuthGuard, ApiService, AppService],
+  providers: [CheckAuthGuard, ApiService, AppService, SwaggerService],
 })
 export class AppModule {}

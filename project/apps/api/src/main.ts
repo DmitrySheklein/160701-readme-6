@@ -6,10 +6,10 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
-import { SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { RequestIdInterceptor } from '@project/interceptors';
 import { SwaggerService } from './app/service/swagger.service';
+import { SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,9 +22,11 @@ async function bootstrap() {
     })
   );
 
-  const { config, swaggerCustomOptions } = SwaggerService.createConfig();
+  const swaggerService = app.get(SwaggerService);
+  const { config, swaggerCustomOptions } = swaggerService.createConfig();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('spec', app, document, swaggerCustomOptions);
+  const swaggerPathPrefix = 'spec';
+  SwaggerModule.setup(swaggerPathPrefix, app, document, swaggerCustomOptions);
 
   const configService = app.get(ConfigService);
   const port = configService.get('application.port');
@@ -32,6 +34,7 @@ async function bootstrap() {
   Logger.log(
     `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
   );
+  Logger.log(`🚀 Swagger api: http://localhost:${port}/${swaggerPathPrefix}`);
 }
 
 bootstrap();
