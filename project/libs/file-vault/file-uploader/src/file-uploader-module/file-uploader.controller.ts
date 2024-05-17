@@ -5,7 +5,9 @@ import {
   Get,
   HttpStatus,
   Param,
+  ParseArrayPipe,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -17,6 +19,8 @@ import { fillDto, generateSchemeApiError } from '@project/shared/helpers';
 import {
   ApiBody,
   ApiConsumes,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -100,6 +104,28 @@ export class FileUploaderController {
     const existFile = await this.fileUploaderService.saveFile(file);
 
     return fillDto(UploadedFileRdo, existFile.toPOJO());
+  }
+
+  @ApiOkResponse({
+    isArray: true,
+    type: UploadedFileRdo,
+    description: 'File founded successfully',
+  })
+  @ApiNotFoundResponse({
+    description: 'File not found',
+    schema: generateSchemeApiError('File not found', HttpStatus.NOT_FOUND),
+  })
+  @ApiOperation({ summary: 'Получить файлы по ID' })
+  @Get('all')
+  public async showAll(
+    @Query('filesIds', ParseArrayPipe, MongoIdValidationPipe) filesIds: string[]
+  ) {
+    const existFiles = await this.fileUploaderService.getFilesByIds(filesIds);
+
+    return fillDto(
+      UploadedFileRdo,
+      existFiles.map((el) => el.toPOJO())
+    );
   }
 
   @ApiResponse({
