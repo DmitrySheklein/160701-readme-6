@@ -7,6 +7,7 @@ export * from './blog/content/index';
 
 // Posts-comment
 export { CreateCommentDto } from './blog/comments/create-comment.dto';
+export { CreateCommentWithUserDto } from './blog/comments/create-comment-with-user.dto';
 export { UpdateCommentDto } from './blog/comments/update-comment.dto';
 // Posts-tags
 export { CreateTagDto } from './blog/tags/create-tag.dto';
