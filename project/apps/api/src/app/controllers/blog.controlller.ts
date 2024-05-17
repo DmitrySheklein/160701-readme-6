@@ -109,23 +109,28 @@ export class BlogController {
       },
     });
 
+    const files = await this.apiService.fileVault<string, UploadedFileRdo[]>({
+      method: 'get',
+      endpoint: 'all',
+      options: {
+        params: { filesIds: users.map((el) => el.avatar) },
+      },
+    });
+
+    const fullUsers: UserFullRdo[] = users.map((el) => {
+      const avatar = files.find((file) => file.id === el.avatar)?.path || null;
+
+      return {
+        ...el,
+        avatar,
+      };
+    });
+
     const concatedPosts: PostWithPaginationRdo<PostWithAuthorFullRdo> = {
       ...posts,
       entities: await Promise.all(
         posts.entities.map(async (post) => {
-          const user = users.find((user) => user.id === post.authorId);
-
-          if (user?.avatar) {
-            const file = await this.apiService.fileVault<
-              string,
-              UploadedFileRdo
-            >({
-              method: 'get',
-              endpoint: user.avatar,
-            });
-
-            user.avatar = file.path;
-          }
+          const user = fullUsers.find((user) => user.id === post.authorId);
 
           return {
             ...post,
