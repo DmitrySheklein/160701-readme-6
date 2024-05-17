@@ -11,7 +11,7 @@ import {
 import { CommentsService } from './comments.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { fillDto, generateSchemeApiError } from '@project/shared/helpers';
-import { CreateCommentDto, UpdateCommentDto } from '@project/dto';
+import { CreateCommentWithUserDto, UpdateCommentDto } from '@project/dto';
 import { CommentRdo } from '@project/rdo';
 
 @ApiTags('comments')
@@ -31,7 +31,7 @@ export class CommentsController {
   @Post()
   public async create(
     @Param('postId') postId: string,
-    @Body() createCommentDto: CreateCommentDto
+    @Body() createCommentDto: CreateCommentWithUserDto
   ) {
     const newComment = await this.commentsService.create(
       postId,
@@ -57,7 +57,7 @@ export class CommentsController {
   })
   @Get(':commentId')
   public async findOne(@Param('commentId') commentId: string) {
-    const existComment = await this.commentsService.findOne(commentId);
+    const existComment = await this.commentsService.findById(commentId);
 
     return fillDto(CommentRdo, existComment.toPOJO());
   }
@@ -127,8 +127,11 @@ export class CommentsController {
     summary: 'Удалить комментарий',
     description: 'Remove comment',
   })
-  @Delete(':commentId')
-  public async remove(@Param('commentId') commentId: string) {
-    return this.commentsService.remove(commentId);
+  @Delete(':commentId/:userId')
+  public async remove(
+    @Param('commentId') commentId: string,
+    @Param('userId') userId: string
+  ) {
+    return this.commentsService.remove(commentId, userId);
   }
 }

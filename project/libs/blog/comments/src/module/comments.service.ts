@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CommentRepository } from './comment.repository';
 import { CommentEntity } from './entities/comment.entity';
-import { CreateCommentDto, UpdateCommentDto } from '@project/dto';
+import { CreateCommentWithUserDto, UpdateCommentDto } from '@project/dto';
 
 @Injectable()
 export class CommentsService {
   constructor(private readonly commentsRepository: CommentRepository) {}
 
-  public async create(postId: string, dto: CreateCommentDto) {
+  public async create(postId: string, dto: CreateCommentWithUserDto) {
     const commentEntity = new CommentEntity({ ...dto, postId });
 
     return this.commentsRepository.save(commentEntity);
@@ -21,7 +21,7 @@ export class CommentsService {
     return this.commentsRepository.find();
   }
 
-  public async findOne(id: string) {
+  public async findById(id: string) {
     const existComment = await this.commentsRepository.findById(id);
 
     return existComment;
@@ -39,7 +39,12 @@ export class CommentsService {
     return newComment;
   }
 
-  public async remove(id: string) {
+  public async remove(id: string, userId: string) {
+    const comment = await this.commentsRepository.findById(id);
+
+    if (comment.userId !== userId) {
+      throw new ConflictException('Удалять комментарий может только автор');
+    }
     return this.commentsRepository.deleteById(id);
   }
 }
