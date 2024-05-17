@@ -30,6 +30,7 @@ import {
   ApiBadRequestResponse,
   ApiOkResponse,
   ApiUnauthorizedResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { AuthenticationResponseMessage } from './authentication.constant';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -80,6 +81,9 @@ export class AuthenticationController {
     description: 'Bad request data',
     schema: generateSchemeApiError('Bad request data', HttpStatus.BAD_REQUEST),
   })
+  @ApiOperation({
+    summary: 'Регистрация',
+  })
   @Post('register')
   public async create(@Body() dto: CreateUserDto) {
     const newUser = await this.authService.register(dto);
@@ -98,6 +102,9 @@ export class AuthenticationController {
       HttpStatus.UNAUTHORIZED
     ),
   })
+  @ApiOperation({
+    summary: 'Авторизация',
+  })
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -110,6 +117,9 @@ export class AuthenticationController {
     return fillDto(LoggedUserRdo, { ...user.toPOJO(), ...userToken });
   }
 
+  @ApiOperation({
+    summary: 'Получить пользователя по id',
+  })
   @ApiOkResponse({
     type: UserRdo,
     description: AuthenticationResponseMessage.UserFound,
@@ -142,6 +152,9 @@ export class AuthenticationController {
   @ApiBadRequestResponse({
     schema: generateSchemeApiError('Bad request data', HttpStatus.BAD_REQUEST),
   })
+  @ApiOperation({
+    summary: 'Измененить пароля пользователя',
+  })
   @ApiBearerAuth(AuthKeyName)
   @UseGuards(JwtAuthGuard)
   @Patch('change-password')
@@ -159,6 +172,9 @@ export class AuthenticationController {
   @ApiCreatedResponse({
     type: RecoveryEmailRdo,
     description: AuthenticationResponseMessage.RecoveryEmailSuccess,
+  })
+  @ApiOperation({
+    summary: 'Восстановление пароля (письмо)',
   })
   @Post('recovery-email')
   public async recoveryPassword(@Body() dto: RecoveryEmailDto) {
@@ -181,6 +197,9 @@ export class AuthenticationController {
     type: RefreshUserRdo,
     description: AuthenticationResponseMessage.NewJWTTokensSuccess,
   })
+  @ApiOperation({
+    summary: 'Новая пара Access/Refresh токен',
+  })
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtRefreshGuard)
   @Post('refresh')
@@ -189,6 +208,9 @@ export class AuthenticationController {
   }
 
   @ApiBearerAuth(AuthKeyName)
+  @ApiOperation({
+    summary: 'Проверка авторизации пользователя',
+  })
   @UseGuards(JwtAuthGuard)
   @Post('check')
   public async checkToken(@Req() { user: payload }: RequestWithTokenPayload) {
@@ -199,6 +221,9 @@ export class AuthenticationController {
     isArray: true,
     type: UserRdo,
     description: AuthenticationResponseMessage.UserFound,
+  })
+  @ApiOperation({
+    summary: 'Получения списка юзеров по id',
   })
   @Get('users')
   public async findUsers(
@@ -212,6 +237,9 @@ export class AuthenticationController {
     );
   }
 
+  @ApiOperation({
+    summary: 'Удаление пользователя по id',
+  })
   @ApiBearerAuth(AuthKeyName)
   @Roles(UserRole.Admin)
   @UseGuards(RolesGuard)
