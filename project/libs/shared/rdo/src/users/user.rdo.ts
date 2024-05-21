@@ -6,7 +6,7 @@ export class UserRdo implements Omit<User, 'role'> {
   @Expose()
   @ApiProperty({
     description: 'The uniq user ID',
-    example: 'df191215-1f3c-407d-96b2-390bdfae1961',
+    example: '6643537224e91d1093d4bfb1',
   })
   public id!: string;
 

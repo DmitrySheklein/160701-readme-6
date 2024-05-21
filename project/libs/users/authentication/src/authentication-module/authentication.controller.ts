@@ -1,12 +1,16 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Inject,
+  Param,
+  ParseArrayPipe,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -26,6 +30,7 @@ import {
   ApiBadRequestResponse,
   ApiOkResponse,
   ApiUnauthorizedResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { AuthenticationResponseMessage } from './authentication.constant';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -47,6 +52,10 @@ import { LocalAuthGuard } from '../guards/local-auth.guard';
 import { RequestWithUser } from './request-with-user.interface';
 import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
 import { RequestWithTokenPayload } from './request-with-token-payload.interface';
+import { MongoIdValidationPipe } from '@project/pipes';
+import { Roles } from '../decorators/role.decorator';
+import { UserRole } from '@project/shared/core';
+import { RolesGuard } from '../guards/role.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -72,6 +81,9 @@ export class AuthenticationController {
     description: 'Bad request data',
     schema: generateSchemeApiError('Bad request data', HttpStatus.BAD_REQUEST),
   })
+  @ApiOperation({
+    summary: 'Регистрация',
+  })
   @Post('register')
   public async create(@Body() dto: CreateUserDto) {
     const newUser = await this.authService.register(dto);
@@ -90,6 +102,9 @@ export class AuthenticationController {
       HttpStatus.UNAUTHORIZED
     ),
   })
+  @ApiOperation({
+    summary: 'Авторизация',
+  })
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -102,6 +117,9 @@ export class AuthenticationController {
     return fillDto(LoggedUserRdo, { ...user.toPOJO(), ...userToken });
   }
 
+  @ApiOperation({
+    summary: 'Получить пользователя по id',
+  })
   @ApiOkResponse({
     type: UserRdo,
     description: AuthenticationResponseMessage.UserFound,
@@ -134,6 +152,9 @@ export class AuthenticationController {
   @ApiBadRequestResponse({
     schema: generateSchemeApiError('Bad request data', HttpStatus.BAD_REQUEST),
   })
+  @ApiOperation({
+    summary: 'Измененить пароля пользователя',
+  })
   @ApiBearerAuth(AuthKeyName)
   @UseGuards(JwtAuthGuard)
   @Patch('change-password')
@@ -151,6 +172,9 @@ export class AuthenticationController {
   @ApiCreatedResponse({
     type: RecoveryEmailRdo,
     description: AuthenticationResponseMessage.RecoveryEmailSuccess,
+  })
+  @ApiOperation({
+    summary: 'Восстановление пароля (письмо)',
   })
   @Post('recovery-email')
   public async recoveryPassword(@Body() dto: RecoveryEmailDto) {
@@ -173,6 +197,9 @@ export class AuthenticationController {
     type: RefreshUserRdo,
     description: AuthenticationResponseMessage.NewJWTTokensSuccess,
   })
+  @ApiOperation({
+    summary: 'Новая пара Access/Refresh токен',
+  })
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtRefreshGuard)
   @Post('refresh')
@@ -181,9 +208,50 @@ export class AuthenticationController {
   }
 
   @ApiBearerAuth(AuthKeyName)
+  @ApiOperation({
+    summary: 'Проверка авторизации пользователя',
+  })
   @UseGuards(JwtAuthGuard)
   @Post('check')
   public async checkToken(@Req() { user: payload }: RequestWithTokenPayload) {
     return payload;
+  }
+
+  @ApiOkResponse({
+    isArray: true,
+    type: UserRdo,
+    description: AuthenticationResponseMessage.UserFound,
+  })
+  @ApiOperation({
+    summary: 'Получения списка юзеров по id',
+  })
+  @Get('users')
+  public async findUsers(
+    @Query('usersIds', ParseArrayPipe, MongoIdValidationPipe) usersIds: string[]
+  ) {
+    const existUsers = await this.authService.getUsersByIds(usersIds);
+
+    return fillDto(
+      UserRdo,
+      existUsers.map((el) => el.toPOJO())
+    );
+  }
+
+  @ApiOperation({
+    summary: 'Удаление пользователя по id',
+  })
+  @ApiBearerAuth(AuthKeyName)
+  @Roles(UserRole.Admin)
+  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
+  @Delete(':deleteUserId')
+  public async deleteUser(
+    @Param('deleteUserId', MongoIdValidationPipe) deleteUserId: string,
+    @Req() { user }: RequestWithTokenPayload
+  ) {
+    return this.authService.deleteUserById({
+      userId: String(user?.sub),
+      deleteUserId,
+    });
   }
 }

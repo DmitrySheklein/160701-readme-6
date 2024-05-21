@@ -8,6 +8,8 @@ import { ApiService } from './service/api.service';
 import { CheckAuthGuard } from './guards/check-auth.guard';
 import { AppService } from './app.service';
 import { LikesController } from './controllers/likes.controller';
+import { SwaggerService } from './service/swagger.service';
+import { CommentsController } from './controllers/comments.controller';
 
 @Module({
   imports: [
@@ -17,7 +19,12 @@ import { LikesController } from './controllers/likes.controller';
       maxRedirects: HTTP_CLIENT_MAX_REDIRECTS,
     }),
   ],
-  controllers: [BlogController, UsersController, LikesController],
-  providers: [CheckAuthGuard, ApiService, AppService],
+  controllers: [
+    BlogController,
+    UsersController,
+    LikesController,
+    CommentsController,
+  ],
+  providers: [CheckAuthGuard, ApiService, AppService, SwaggerService],
 })
 export class AppModule {}

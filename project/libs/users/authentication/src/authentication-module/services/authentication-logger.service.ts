@@ -34,6 +34,9 @@ export class AuthenticationLoggerService implements AuthService {
   public async getUserById(id: string) {
     return this.proxy.getUserById(id);
   }
+  public async getUsersByIds(ids: string[]) {
+    return this.proxy.getUsersByIds(ids);
+  }
 
   public async getUserByEmail(id: string) {
     return this.proxy.getUserByEmail(id);
@@ -47,5 +50,14 @@ export class AuthenticationLoggerService implements AuthService {
   }
   public async recoveryEmail(dto: RecoveryEmailDto) {
     return this.proxy.recoveryEmail(dto);
+  }
+  public async deleteUserById({
+    userId,
+    deleteUserId,
+  }: {
+    userId: string;
+    deleteUserId: string;
+  }) {
+    return this.proxy.deleteUserById({ userId, deleteUserId });
   }
 }

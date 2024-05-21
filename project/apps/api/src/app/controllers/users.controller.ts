@@ -157,7 +157,7 @@ export class UsersController {
   @ApiBearerAuth(AuthKeyName)
   @UseGuards(CheckAuthGuard)
   @ApiOperation({
-    summary: 'Данные по пользователю',
+    summary: 'Получить пользователя по id',
   })
   @Get('info')
   public async info(@Req() req: Request) {
@@ -188,7 +188,7 @@ export class UsersController {
   @UseGuards(CheckAuthGuard)
   @UseInterceptors(InjectUserIdInterceptor)
   @ApiOperation({
-    summary: 'Смена пароля',
+    summary: 'Измененить пароля пользователя',
   })
   @Patch('change-password')
   public async changePassword(

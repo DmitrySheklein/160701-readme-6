@@ -69,6 +69,10 @@ export class FileUploaderService {
     return existFile;
   }
 
+  public async getFilesByIds(ids: string[]) {
+    return this.fileRepository.findManyByFileIds(ids);
+  }
+
   public async writeFile(file: Express.Multer.File): Promise<StoredFile> {
     try {
       const { port, serveRoot } = this.config;
